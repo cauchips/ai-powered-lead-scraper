@@ -88,7 +88,7 @@ The AI-Powered Lead Scraper effectively unites live-scraped directory data and a
 
 ## References
 
-- DistilBERT SST-2 (`distilbert-base-uncased-finetuned-sst-2-english`) for sentiment analysis. :contentReference[oaicite:0]{index=0}  
-- SentenceTransformer “all-MiniLM-L6-v2” for semantic embeddings. :contentReference[oaicite:1]{index=1}  
-- Kaggle “BigPicture 2023 Q4 Free Company Dataset” (ODC-By license). :contentReference[oaicite:2]{index=2}  
+- DistilBERT SST-2 (`distilbert-base-uncased-finetuned-sst-2-english`) for sentiment analysis.
+- SentenceTransformer “all-MiniLM-L6-v2” for semantic embeddings.
+- Kaggle “BigPicture 2023 Q4 Free Company Dataset” (ODC-By license).
 
