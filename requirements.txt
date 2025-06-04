@@ -1,0 +1,13 @@
+streamlit
+pandas
+numpy
+requests
+beautifulsoup4
+fuzzywuzzy
+python-Levenshtein
+geopy
+sentence-transformers
+torch
+transformers
+faiss-cpu
+pycountry
