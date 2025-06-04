@@ -6,89 +6,94 @@
 
 ## 1. Objective & Approach
 
-The **AI-Powered Lead Scraper** project integrates two data sources:
+The AI-Powered Lead Scraper merges two data sources to quickly identify high-impact SME acquisition targets:
 
 1. **Live HTML Scraping**  
-   - Business listings are collected from YellowPages, Yelp, and Manta (up to 10 results per source).  
-   - Rotating User-Agent headers and 0.3-second delays are used to minimize blocking risk.  
-   - FuzzyWuzzy deduplication ensures near-duplicate entries are removed.  
+   - Scrapes YellowPages, Yelp, and Manta (up to 10 results each).  
+   - Rotating User-Agent headers, 0.3 s delays, and fuzzy deduplication ensure reliability and uniqueness.  
 
 2. **Kaggle “BigPicture” Dataset**  
-   - The “companies-2023-q4-sm.csv” file (approximately 17 million rows, ODC-By license) is loaded into a Pandas DataFrame.  
-   - Only a subset (configurable via `USE_ROWS = 500000`) is imported to balance performance and coverage.  
-   - A `country_name` column is derived from `country_code` using **pycountry**, enabling full-country name filtering (e.g., “United States”).
+   - Loads “companies-2023-q4-sm.csv” (~17 million rows), using a subset of 500 000 for performance.  
+   - Derives `country_name` from `country_code` (pycountry) for full-country filtering.  
+   - Filters applied:  
+     • Keyword (substring match in name or industry)  
+     • Location (substring match in city, state, or country_name)  
+     • Optional Category  
+     • Size preference (Small/Medium/Large/Any)  
 
-After merging scraped items with filtered Kaggle rows, each lead receives a **0–100 composite score** for prioritization.
+Merged leads receive a 0–100 composite score for prioritization.
 
 ---
 
-## 2. Data Preprocessing
+## 2. Data Preprocessing & Quality
 
-- **Kaggle Subset**  
-  - Columns selected: `name`, `industry`, `size`, `founded`, `city`, `state`, `country_code`.  
-  - Null values in text fields are replaced with empty strings.  
-  - The two-letter `country_code` is converted to `country_name` via pycountry for user-friendly location matching.
-
-- **Filtering Logic**  
-  - **Keyword** matching is performed as a case-insensitive substring search on `name` or `industry`.  
-  - **Location** matching is performed as a case-insensitive substring search on `city`, `state`, or `country_name`.  
-  - When provided, **Category** filters are applied to both scraped and Kaggle results.  
-  - **Size Preference** is determined by converting Kaggle’s employee-range string into a numeric midpoint; inclusion is based on whether the midpoint falls within (or within 50% of) the chosen range.
-
-- **Scraped Records**  
-  - Yelp snippets (if available) are captured.  
-  - Missing fields (`rating`, `year_founded`, `size`) are stored as `None`.
+- **Text Normalization:** Null text fields (name, industry, city, state, country_code) → empty strings for robust substring matching.  
+- **Size Interpretation:** Employee ranges (e.g., “1–10”, “51–200”) convert to numerical midpoints; full or partial inclusion based on preferred range.  
+- **Geocoding:** Geopy Nominatim translates top-10 lead locations into coordinates; results cached in `geo_cache.json` to speed repeat runs.
 
 ---
 
 ## 3. Scoring Model (0–100)
 
-Each lead’s score is computed as the sum of six weighted components:
+Lead score = sum of six weighted sub-scores:
 
-| Component               | Weight (%) | Calculation                                                                                                                                                                                                            |
-|-------------------------|:----------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Age**                 |     20     | `(CurrentYear – founded) / 20`, capped at 1.0 → multiplied by 20. Companies older than 5 years receive full sub-score.                                                                                                  |
-| **Size**                |     20     | If the size midpoint falls within the preferred range → 20; if within 50% proximity → 10; otherwise → 0.                                                                                                               |
-| **Industry Fit**        |     15     | +15 if the user’s keyword appears (case-insensitive) in the `industry` field.                                                                                                                                            |
-| **Sentiment**           |     10     | The DistilBERT SST-2 model (`distilbert-base-uncased-finetuned-sst-2-english`) predicts P(positive) on the review snippet (or fallback “industry + location”). The probability is multiplied by 10 for this sub-score.    |
-| **Rating**              |     15     | Yelp’s numerical rating (0–5 stars) is normalized by `(rating / 5) × 15`.                                                                                                                                                 |
-| **Semantic Similarity** |     20     | A SentenceTransformer model (“all-MiniLM-L6-v2”) is used to embed the lead’s text (`name + industry + location + first 200 characters of snippet`). Cosine similarity against an “ideal target” vector is computed, normalized to [0,1], then multiplied by 20. |
+| Component               | Weight | Method                                                                                                          |
+|-------------------------|:------:|:----------------------------------------------------------------------------------------------------------------|
+| **Age**                 |  20 %  | `(CurrentYear – founded)/20`, capped at 1.0 → × 20. Prioritizes businesses ≥ 5 years old.                        |
+| **Size**                |  20 %  | Midpoint in preferred range → 20; within 50 % proximity → 10; otherwise → 0.                                     |
+| **Industry Fit**        |  15 %  | + 15 if keyword appears (case-insensitive) in industry.                                                          |
+| **Sentiment**           |  10 %  | DistilBERT SST-2 on review snippet (or fallback “industry + location”) → P(positive) × 10.                        |
+| **Rating**              |  15 %  | Yelp rating (0–5) normalized: `(rating/5) × 15`.                                                                   |
+| **Semantic Similarity** |  20 %  | “all-MiniLM-L6-v2” embeds “name + industry + location + snippet[:200]”; cosine similarity vs. ideal vector, normalized → × 20. |
 
-- **Total Score** = sum of sub-scores (range 0–100).  
-- Leads are sorted in descending order by the total score.  
-- A hoverable tooltip (“ⓘ” next to Score) provides a breakdown of these six components.
+Total = 0–100. Leads sorted descending; hoverable “ⓘ” tooltip explains all six components.
 
 ---
 
-## 4. Performance & Evaluation
+## 4. UX, Technical, Innovation & Results (Combined)
 
-- **Execution Speed**  
-  - Filtering 500,000 Kaggle rows via Pandas boolean masks completes in approximately 3–5 seconds locally.  
-  - Live scraping (30 pages total) with 0.3-second delays completes in about 4–6 seconds.  
-  - Embedding 500 leads with SentenceTransformer (“all-MiniLM-L6-v2”) requires around 1 second.  
-  - Sentiment inference on 500 leads using DistilBERT SST-2 requires around 1 second.  
-  - End-to-end runtime is approximately 8–10 seconds on a modern workstation.
+- **Interface & Workflow**  
+  • Sidebar inputs: Keyword, Location (city/state or full country), optional Category, Size.  
+  • Single “Generate Leads” button triggers scraping, filtering, scoring.  
+  • Spinner “Searching and scoring…” keeps users informed.  
+  • Results: high-contrast table of top 20 leads (Name, Industry, Location, Phone, Founded, Size, Rating, Score).  
+  • Tooltip (“ⓘ” next to Score) clarifies weights.  
+  • Interactive `st.map` displays the top 10 geocoded locations.  
+  • Export buttons: “Download CSV” and “Download JSON” for seamless CRM integration.
 
-- **Ranking Effectiveness**  
-  - The 0–100 scoring scale produces few ties in the top 20 across various test queries (e.g., “Bakery Austin TX”).  
-  - Manual inspection confirmed that older, mid-sized, positively reviewed, owner-operated businesses typically receive higher scores.  
-  - The sidebar tooltip describing sub-score weights has been found to increase user trust and transparency.
+- **Performance & Technical Highlights**  
+  • Kaggle filtering (500 000 rows): ~ 3–5 s via Pandas boolean masks.  
+  • Scraping (30 pages): ~ 4–6 s with rotating UAs and delays.  
+  • DistilBERT SST-2 sentiment on 500 leads: ~ 1 s.  
+  • SentenceTransformer embeddings on 500 leads: ~ 1 s.  
+  • **End-to-end runtime:** ~ 8–10 s.  
+  • FuzzyWuzzy deduplication ensures unique lead names.  
+  • `country_name` filtering accepts full-country input (e.g., “United States”).  
+  • Modular architecture allows easy addition of new scrapers or model updates.
 
-- **Scalability**  
-  - Increasing `USE_ROWS` to 1,000,000 raises filtering time to about 8 seconds. Index-based or FAISS-driven retrieval could be implemented for large-scale use.  
-  - Additional scrapers or higher scraping volume would benefit from asynchronous requests or headless-browser fallbacks for CAPTCHAs.
+- **Innovation & Value-Add**
+
+  | Innovation Aspect      | Description                                                                                      |
+  |------------------------|--------------------------------------------------------------------------------------------------|
+  | Ethical Scraping       | Rotating User-Agents and polite delays reduce server strain and avoid IP blocks.                |
+  | Open-Source Pipeline   | No paid APIs, uses only public HTML and a free Kaggle dataset, lowering cost barriers.            |
+  | Geocoding Cache        | Coordinates saved in `geo_cache.json` eliminate redundant requests and improve speed.            |
+  | CRM Integration        | Ready-to-download CSV/JSON output can be imported directly into sales platforms.                 |
+  | Future-Proof Design    | Modular codebase supports adding enrichment APIs (email lookup) or advanced retrieval (FAISS).   |
+
+- **Result Summary**  
+  • Top 20 results consistently feature mid-sized, well-established, positively-reviewed businesses aligned with acquisition criteria.  
+  • Manual testing by the developer confirmed quick response, accurate scoring, and user-friendly outputs.
 
 ---
 
 ## 5. Conclusion
 
-The AI-Powered Lead Scraper effectively unites live-scraped directory data and a large Kaggle dataset into a single pipeline. A six-factor, 0–100 composite scoring system leveraging DistilBERT (SST-2) and SentenceTransformer embeddings ensures well-rounded, transparent lead prioritization. This open-source solution (no paid APIs) and lightweight Streamlit interface provide an accessible, high-impact lead-generation tool for acquisition entrepreneurs.
+The AI-Powered Lead Scraper meets core business needs by delivering prioritized, high-impact leads in under 10 seconds. Its transparent scoring, intuitive UI, and open-source design make it a practical, scalable solution for acquisition-focused users.
 
 ---
 
-## References
-
-- DistilBERT SST-2 (`distilbert-base-uncased-finetuned-sst-2-english`) for sentiment analysis.
-- SentenceTransformer “all-MiniLM-L6-v2” for semantic embeddings.
-- Kaggle “BigPicture 2023 Q4 Free Company Dataset” (ODC-By license).
-
+**References**  
+- DistilBERT SST-2 (sentiment analysis)  
+- SentenceTransformer “all-MiniLM-L6-v2” (semantic embeddings)  
+- Kaggle “BigPicture 2023 Q4” Free Company Dataset (ODC-By license)  
