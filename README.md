@@ -3,6 +3,7 @@
 A free, data-driven Streamlit application that aggregates, enriches, and ranks high-impact business leads. This tool combines live HTML scraping (YellowPages, Yelp, Manta) with the “BigPicture” Kaggle dataset (~17 million global companies) to generate a top-20 list of acquisition-grade targets without paid APIs or subscriptions.
 
 ---
+> 📄 For a detailed technical overview (approach, model selection, data preprocessing, performance evaluation), see [report.md](report.md).
 
 ## 📂 Repository Structure
 ```
