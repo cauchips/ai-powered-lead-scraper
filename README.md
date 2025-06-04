@@ -95,9 +95,9 @@ cd ai-powered-lead-scraper
   https://www.kaggle.com/datasets/mfrye0/bigpicture-company-dataset/data  
 - Download `companies-2023-q4-sm.csv` (approximately 2 GB).  
 - Place it in the `data/` folder so the path is:  
-    ```
-     data/companies-2023-q4-sm.csv
-     ```
+        ```
+         data/companies-2023-q4-sm.csv
+         ```
 
 ### 3. Install Dependencies
 
