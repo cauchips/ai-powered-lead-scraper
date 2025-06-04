@@ -82,7 +82,7 @@ Each lead’s score is computed as the sum of six weighted components:
 
 ## 5. Conclusion
 
-The AI-Powered Lead Scraper effectively unites live-scraped directory data and a large Kaggle dataset into a single pipeline. A six-factor, 0–100 composite scoring system—leveraging DistilBERT (SST-2) and SentenceTransformer embeddings—ensures well-rounded, transparent lead prioritization. This open-source solution (no paid APIs) and lightweight Streamlit interface provide an accessible, high-impact lead-generation tool for acquisition entrepreneurs.
+The AI-Powered Lead Scraper effectively unites live-scraped directory data and a large Kaggle dataset into a single pipeline. A six-factor, 0–100 composite scoring system leveraging DistilBERT (SST-2) and SentenceTransformer embeddings ensures well-rounded, transparent lead prioritization. This open-source solution (no paid APIs) and lightweight Streamlit interface provide an accessible, high-impact lead-generation tool for acquisition entrepreneurs.
 
 ---
 
