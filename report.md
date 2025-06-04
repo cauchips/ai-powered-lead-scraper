@@ -50,7 +50,7 @@ Total = 0–100. Leads sorted descending; hoverable “ⓘ” tooltip explains a
 
 ---
 
-## 4. UX, Technical, Innovation & Results (Combined)
+## 4. Performance & Evaluation
 
 - **Interface & Workflow**  
   • Sidebar inputs: Keyword, Location (city/state or full country), optional Category, Size.  
@@ -61,7 +61,7 @@ Total = 0–100. Leads sorted descending; hoverable “ⓘ” tooltip explains a
   • Interactive `st.map` displays the top 10 geocoded locations.  
   • Export buttons: “Download CSV” and “Download JSON” for seamless CRM integration.
 
-- **Performance & Technical Highlights**  
+- **Speed & Technical Highlights**  
   • Kaggle filtering (500 000 rows): ~ 3–5 s via Pandas boolean masks.  
   • Scraping (30 pages): ~ 4–6 s with rotating UAs and delays.  
   • DistilBERT SST-2 sentiment on 500 leads: ~ 1 s.  
