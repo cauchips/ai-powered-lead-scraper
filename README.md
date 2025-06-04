@@ -127,10 +127,10 @@ streamlit run app.py
 
 - The app opens in your browser at `http://localhost:8501` (or another available port).  
 - **Sidebar Inputs**:  
-1. **Keyword** (required)  
-2. **Location** (city/state or full country name, required)  
-3. **Industry/Category** (optional)  
-4. **Preferred Company Size** (Any / Small / Medium / Large)  
+    1. **Keyword** (required)  
+    2. **Location** (city/state or full country name, required)  
+    3. **Industry/Category** (optional)  
+    4. **Preferred Company Size** (Any / Small / Medium / Large)  
 - Click **Generate Leads**.  
 - View the **Top 20** leads sorted by **Score**. Hover “ⓘ” next to **Score** for details.  
 - Scroll down to see a **Map** of the top 10 geocoded leads.  
@@ -143,12 +143,12 @@ streamlit run app.py
 1. **Open** `deployment.ipynb` in a Jupyter environment (e.g., Google Colab).  
 2. **Upload** `data/companies-2023-q4-sm.csv` into the notebook’s file system.  
 3. **Run all cells** sequentially:  
- - Installs dependencies (from `requirements.txt`)  
- - Starts an ngrok tunnel (generates a public URL)  
- - Launches Streamlit behind the ngrok URL  
+     - Installs dependencies (from `requirements.txt`)  
+     - Starts an ngrok tunnel (generates a public URL)  
+     - Launches Streamlit behind the ngrok URL  
 4. **Copy** the ngrok public URL and open it in your browser to use the live app remotely.
 
-> When the notebook session ends, the ngrok tunnel—and public URL—expire automatically.
+> When the notebook session ends, the ngrok tunnel and public URL expire automatically.
 
 ---
 
