@@ -5,7 +5,7 @@ A free, data-driven Streamlit application that aggregates, enriches, and ranks h
 ---
 
 ## 📂 Repository Structure
-
+```
 ai-powered-lead-scraper/  
 ├── app.py                 # Main Streamlit application  
 ├── style.css              # Optional custom CSS for UI styling  
@@ -19,7 +19,7 @@ ai-powered-lead-scraper/
     ├── evaluation.py      # Scoring logic (Age, Size, Industry, Sentiment, Rating, Semantic)  
     ├── llm.py             # DistilBERT SST-2 for sentiment inference  
     └── utils.py           # JSON cache helper (for geocoding)  
-
+```
 ---
 
 ## 🎯 Overview
